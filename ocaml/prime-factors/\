@@ -1,0 +1,15 @@
+open Base
+open Int
+open Sequence
+
+let factors_of number =
+  Sequence.unfold_step ~init:(2, number) ~f:(fun (i, n) ->
+    print_int i;print_char '-'; print_int n; print_newline ();
+    if i > n then
+      Sequence.Step.Done
+    else if (n % i) = 0 then
+      Sequence.Step.Yield { value = i; state = (2, (number / i)) }
+    else
+      Sequence.Step.Skip { state = (succ i, number) }
+  )
+  |> Sequence.to_list
