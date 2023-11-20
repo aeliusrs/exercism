@@ -5,27 +5,24 @@ type school = string list Int_map.t
 
 let empty_school = Map.empty (module Int)
 
-let add name grade (s: school) =
-  Map.update s grade
-  ~f:(function
-    | None -> name :: []
-    | Some lst -> name :: lst
-  )
+let add name grade school =
+  school
+  |> Map.add_multi ~key:grade ~data:name
 
-let grade want (s: school) =
-  s
+(* you could use Fn.flip -> https://ocaml.janestreet.com/ocaml-core/v0.13/doc/base/Base/Fn/index.html *)
+let grade want school =
+  school
   |> Map.to_alist
   |> List.filter ~f:(fun (g, _) -> g = want)
   |> List.map ~f:(fun (_, name) -> name)
   |> List.concat
 
-let sorted (s: school) =
-  s
+let sorted school =
+  school
   |> Map.map ~f:(fun lst -> List.sort ~compare:String.compare lst)
 
-let roster (s: school) =
-  s
+let roster school =
+  school
   |> sorted
-  |> Map.to_alist
-  |> List.map ~f:(fun (_, name) -> name)
+  |> Map.data
   |> List.concat
