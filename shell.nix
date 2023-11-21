@@ -12,7 +12,7 @@
     darcs                   #Opam distributed smart revision control source
   ]);
   runScript = "bash";
-  profile = "eval $(opam env)";
+  profile = "eval $(opam env); export alias vim=nvim";
 }).env
 
 # get the ocaml version: ocaml --version
