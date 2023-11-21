@@ -12,6 +12,7 @@
     darcs                   #Opam distributed smart revision control source
   ]);
   runScript = "bash";
+  profile = "eval $(opam env)";
 }).env
 
 # get the ocaml version: ocaml --version
