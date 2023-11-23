@@ -1,0 +1,26 @@
+let length lst =
+  let rec folder i lst =
+    match lst with
+    | [] -> i
+    | _ :: td -> folder (succ i) td
+  in
+  folder 0 lst
+
+let reverse lst =
+  let rec folder acc lst =
+    match acc, lst with
+    | acc, [] -> acc
+    | [], bhd :: btd -> folder [bhd] btd
+    | ahd :: atd, bhd :: btd -> folder 
+  in
+  folder [] lst
+
+let map ~f lst =
+
+let filter ~f lst =
+
+let fold ~init ~f lst =
+
+let append _ _ =
+
+let concat _ =
