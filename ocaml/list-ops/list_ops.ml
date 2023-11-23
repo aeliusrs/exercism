@@ -21,5 +21,5 @@ let filter ~f t =
 let append t t' =
   fold_right ~init:t' ~f:(fun acc e -> e :: acc) t
 
-let concat t = (* test will always time out, even concat from base is slow)
+let concat t = (* test will always time out, even concat from base is slow*)
   fold_right ~init:[] ~f:(fun acc e -> append e acc) t
