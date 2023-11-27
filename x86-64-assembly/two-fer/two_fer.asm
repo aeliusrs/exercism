@@ -4,9 +4,9 @@ default rel
 ; Then run tests with 'make'
 
 section .rodata
-  noarg db "One for you, one for me.", 0x0a
-  prefix db "One for ", 0x0a
-  suffix db ", one for me.", 0x0a
+  prefix db "One for "
+  noarg db "you"
+  suffix db ", one for me.", 0x0
 
   noarg_len equ $-noarg
   prefix_len equ $-prefix
@@ -15,15 +15,46 @@ section .rodata
 global two_fer
 section .text
 two_fer:
-    ; save name in r8d register
-    ; save buffer in r9d register
-    mov rdi, r8
-    mov rsi, r9
+    mov r8, rdi
 
-    ; check if name is null
+    jmp .print_prefix
+
     cmp r8, 0
-    je print_noarg
-ret
+    jz .print_noarg
+;    jmp .print_arg
+
+    jmp .print_suffix
+    ret
+
+    .print_prefix:
+    mov rdi, rsi
+    lea rsi, [rel prefix]
+    mov rcx, prefix_len
+    repe movsb
+    ret
+
+    .print_noarg:
+    mov rdi, rsi
+    lea rsi, [rel noarg]
+    mov rcx, noarg_len
+    repe movsb
+    ret
+
+    .print_arg:
+    mov rdi, rsi
+    lea rsi, [rel r8]
+    mov rcx, 10
+    repe movsb
+    ret
+
+
+    .print_suffix:
+    mov rdi, rsi
+    lea rsi, [rel suffix]
+    mov rcx, suffix_len
+    repe movsb
+    ret
+
 
 
 %ifidn __OUTPUT_FORMAT__,elf64
