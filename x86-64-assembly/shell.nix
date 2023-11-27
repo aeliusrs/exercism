@@ -8,7 +8,6 @@
     nasm
     xxd
     hexdump
-    linux_6_1.perf
   ]);
   runScript = "bash";
 }).env
