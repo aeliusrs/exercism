@@ -1,45 +1,44 @@
 open Base
 open Int64
 
-let units = [
-  "zero"; "one"; "two"; "three"; "four"; "five"; 
-  "six"; "seven"; "eight"; "nine"
-]
+let units = [|
+  ""; "one"; "two"; "three"; "four"; "five";
+  "six"; "seven"; "eight"; "nine";"ten";
+  "eleven"; "twelve"; "thirteen"; "fourteen"; "fifteen";
+  "sixteen"; "seventeen"; "eighteen"; "nineteen" |]
 
-let teens = [
-  "ten"; "eleven"; "twelve"; "thirteen"; "fourteen"; "fifteen";
-  "sixteen"; "seventeen"; "eighteen"; "nineteen"
-]
-
-
-let tens = [
+let tens = [|
   ""; ""; "twenty"; "thirty"; "forty"; "fifty";
-  "sixty"; "seventy"; "eighty"; "ninety"
-]
+  "sixty"; "seventy"; "eighty"; "ninety" |]
 
-let get_n n div lst sep =
-  let upper_i = Int64.(/) n div |> Int64.to_int_exn in
-  let minor_i = Int64.rem n div in
-  if minor_i = 0L then
-    List.nth_exn lst upper_i
-  else
-    (List.nth_exn lst upper_i) ^ sep ^ (translate minor_i)
-
-let rec translate number =
-  match number with
-  | 0L -> "zero"
-  | n when n < 10L -> List.nth_exn units (Int64.to_int_exn n)
-  | n when n < 20L -> List.nth_exn teens (Int64.to_int_exn (n - 10L))
-  | n when n < 100L -> get_n n 10L tens " "
-  | n when n < 1000L -> get_n n 100L units " hundred "
-  | n when n < 10_000L -> get_n n 1000L units " thousand "
-  | n when n < 100_000L -> get_n n 1000L tens " thousand "
-  | _ -> "coming"
-
-let compress number =
-  List.fold ~init:number ~f(fun acc n
+let rec translate = function
+  | n when n < 20L -> units.(Int64.to_int_exn n)
+  | n when n < 100L ->
+      let x' = n / 10L in
+      let x'' = n % 10L in
+      if x'' = 0L then
+        tens.(Int64.to_int_exn x')
+      else
+        tens.(Int64.to_int_exn x') ^ "-" ^ translate x''
+  | n when n < 1000L ->
+      let x' = n / 100L in
+      let x'' = n % 100L in
+      translate x' ^ " hundred " ^ translate x''
+  | n when n < 1_000_000L ->
+      let x' = n / 1000L in 
+      let x'' = n % 1000L in
+      translate x' ^ " thousand " ^ translate x''
+  | n when n < 1_000_000_000L ->
+      let x' = n / 1_000_000L in 
+      let x'' = n % 1_000_000L in
+      translate x' ^ " million " ^ translate x''
+  | n when n < 1_000_000_000_000L ->
+      let x' = n / 1_000_000_000L
+      in let x'' = n % 1_000_000_000L in
+      translate x' ^ " billion " ^ translate x''
+  | _ -> ""
 
 let in_english = function
-  | n when n < 0L -> Error "numbers below zero are out of range"
-  | n when n > 100_000L -> Error "numbers above 999,999,999,999 are out of range"
-  | n -> Ok (compress n)
+  | 0L -> Ok "zero"
+  | n when n < 0L || n > 999_999_999_999L -> Error "input out of range"
+  | n -> Ok (translate n |> String.strip)
