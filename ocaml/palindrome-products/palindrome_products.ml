@@ -45,7 +45,7 @@ let show_palindrome_products p =
       Printf.sprintf "{%d; [%d, %d]}" x (fst lst) (snd lst)
   | None -> "{None; []}"
 
-let equal_palindrome_products a b = 
+let equal_palindrome_products a b =
   match a.value, b.value with
   | Some p, Some p' -> p = p'
   | None, None -> true

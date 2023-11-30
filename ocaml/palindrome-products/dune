@@ -1,8 +1,6 @@
 (executable
  (name test)
- (libraries base ounit2)
- (preprocess
-  (pps ppx_deriving.eq ppx_deriving.show)))
+ (libraries base ounit2))
 
 (alias
  (name runtest)
