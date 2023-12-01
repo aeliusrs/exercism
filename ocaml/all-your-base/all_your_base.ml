@@ -5,8 +5,7 @@ type base = int
 let valid digits from =
   List.filter digits ~f:(function
       | n when n >= 0 && n < from -> false
-      | _ -> true
-    )
+      | _ -> true)
   |> List.is_empty
 
 let convert_bases ~from ~digits ~target =
