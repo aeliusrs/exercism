@@ -1,0 +1,32 @@
+{
+  "authors": [],
+  "contributors": [
+    "daveyarwood",
+    "dvberkel",
+    "iHiD",
+    "ismaelga",
+    "kytrinyx",
+    "marionebl",
+    "Peaupote",
+    "pminten",
+    "sbl",
+    "sshine",
+    "stevejb71",
+    "tmcgilchrist"
+  ],
+  "files": {
+    "solution": [
+      "minesweeper.ml"
+    ],
+    "test": [
+      "test.ml"
+    ],
+    "example": [
+      ".meta/example.ml"
+    ],
+    "editor": [
+      "minesweeper.mli"
+    ]
+  },
+  "blurb": "Add the numbers to a minesweeper board."
+}
