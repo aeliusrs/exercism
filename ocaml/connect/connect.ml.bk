@@ -1,0 +1,66 @@
+open Base
+
+type player = O | X
+
+let formatted line = (* to format the input *)
+  line
+  |> String.filter ~f:(fun c -> not (Char.equal c ' '))
+  |> String.to_list
+
+let rotate board = (* rotate 90deg the matrix *)
+  board
+  |> List.transpose_exn
+  |> List.map ~f:List.rev
+
+let retrieve board row col =
+  match List.nth board col with
+  | None -> '.'
+  | Some line -> line
+      |> Fn.flip List.nth row
+      |> function | None -> '.' | Some c -> c
+
+
+(* --- Algorithm *)
+
+let get_ps board player col = (* get position of player in certain col *)
+  board
+  |> List.map ~f:(fun l -> List.nth l col)
+  |> List.foldi ~init:[] ~f:(fun index acc e ->
+      match e with
+      | None -> acc
+      | Some e' -> if Char.equal e' player then (col, index) :: acc else acc)
+  |> List.rev
+
+let is_connected board player row col = (* check player is connected *)
+  let indices = [
+    row, col - 1; row, col + 1; (* below / above *)
+    row - 1, col; row + 1, col; (* left / right *)
+  ] in
+  let count = List.count indices ~f:(fun (row', col') ->
+    Char.equal (retrieve board row' col') player)
+  in
+  match row, count with
+  | 0, n when n >= 1 -> true
+  | _, n when n >= 2 -> true
+  | _ -> false
+
+let compute board player =
+  List.foldi board ~init:0 ~f:(fun line acc _ ->
+    get_ps board player line
+    |> function
+      | [] -> acc
+      | lst -> lst
+        |> List.map ~f:(fun (col', row') ->
+            is_connected board player col' row')
+        |> List.exists ~f:(fun x -> Bool.equal true x)
+        |> function | true -> Int.succ acc | false -> acc)
+
+(* --- MAIN *)
+let connect board =
+  board
+  |> List.map ~f:formatted
+  |> fun board' -> (compute board' 'X', compute (rotate board') 'O')
+  |> function
+    | (true, _) -> Some X
+    | (_, true) -> Some O
+    | _ -> None
