@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "stevejb71"
+  ],
+  "contributors": [
+    "dvberkel",
+    "iHiD",
+    "marionebl",
+    "Peaupote",
+    "petertseng",
+    "sbl",
+    "sshine"
+  ],
+  "files": {
+    "solution": [
+      "dominoes.ml"
+    ],
+    "test": [
+      "test.ml"
+    ],
+    "example": [
+      ".meta/example.ml"
+    ],
+    "editor": [
+      "dominoes.mli"
+    ]
+  },
+  "blurb": "Make a chain of dominoes."
+}
