@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "stevejb71"
+  ],
+  "contributors": [
+    "daveyarwood",
+    "iHiD",
+    "kytrinyx",
+    "marionebl",
+    "Peaupote",
+    "sbl",
+    "sshine"
+  ],
+  "files": {
+    "solution": [
+      "rectangles.ml"
+    ],
+    "test": [
+      "test.ml"
+    ],
+    "example": [
+      ".meta/example.ml"
+    ],
+    "editor": [
+      "rectangles.mli"
+    ]
+  },
+  "blurb": "Count the rectangles in an ASCII diagram."
+}
