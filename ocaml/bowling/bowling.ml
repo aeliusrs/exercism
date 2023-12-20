@@ -2,51 +2,35 @@ open Base
 
 type t = { game: int list; frames: int }
 
+let get_last_frame = function
+  | a :: b :: _ -> (a, b)
+  | a :: _ -> (a, 0)
+  | _ -> (0, 0)
 
-(* tool *)
-let is_strike pins = (pins = 10)
+let rec count acc i lst =
+  if i < 10 then
+    match lst with (* strike / spare / open / error *)
+    | 10 :: (b :: c :: _ as rest) -> count (acc + 10 + b + c) (Int.succ i) rest
+    | a :: b :: (c :: _ as rest) when a + b = 10 ->
+        count (acc + 10 + c) (Int.succ i) rest
+    | a :: b :: rest when a + b < 10 -> count (acc + a + b) (Int.succ i) rest
+    | _ :: _ | [] -> Error "Score cannot be taken until the end of the game"
+  else Ok acc
 
-let is_frame_start f = (Int.rem f 2 = 0)
-
-let is_last_frame f = (f > 18 && f < 21)
-
-let is_pin_overflow a b = (a + b > 10)
-
-let count_points game =
-  game
-  |> List.map ~f:(fun lst -> List.fold ~init:0 lst ~f:(+))
-  |> List.fold ~init:0 ~f:(+)
-
-(* algo *)
 let new_game : t = { game = []; frames = 0 }
 
+let score { game; _ } = count 0 0 (List.rev game)
+
 let roll throw {game; frames} =
-  match game, frames, throw with
-  | _, _, n when n < 0 -> Error "Negative roll is invalid"
-  | _, _, n when n > 10 -> Error "Pin count exceeds pins on the lane"
-  | [], 0, 10 -> Ok {game = [10;0]; frames = 2} (* begin strike *)
-  | [], 0, n -> Ok {game = [n]; frames = 1} (* begin open *)
-  | hd :: sd :: _, 20, _ when (* last frame *)
-      not(is_strike sd) && not(is_strike (hd + sd)) ->
-        Error "Cannot roll after game is over"
-  | hd :: sd :: _, 20, n when (* last frame *)
-      is_pin_overflow hd n && not(is_strike (hd + sd)) ->
-        Error "Pin count exceeds pins on the lane"
-  | g, f, 10 when f < 18 -> Ok { game = 10 :: 0 :: g; frames = f + 2 } (* normal strike *)
-  | g, f, 10 -> Ok { game = 10 :: 0 :: g; frames = f + 1 } (* normal strike *)
-  | hd :: _, f, n when
-      is_frame_start f && not(is_strike hd) && is_pin_overflow hd n ->
+  match throw, frames, get_last_frame game with
+  | t, _, _       when t < 0 -> Error "Negative roll is invalid"
+  | t, _, _       when t > 10 -> Error "Pin count exceeds pins on the lane"
+  | t, f, (a, _)  when f < 18 && (Int.rem f 2 <> 0) && (a + t > 10)->
       Error "Pin count exceeds pins on the lane"
-  | g, f, n -> Ok { game = n :: g; frames = f + 1 } (* normal open *)
-
-let score { game; frames } =
-  match game, frames with
-  | hd :: sd :: _, f when is_strike (hd + sd) && is_last_frame f ->
-      Error "Score cannot be taken until the end of the game"
-  | hd :: _, f when is_strike hd && is_last_frame f ->
-      Error "Score cannot be taken until the end of the game"
-  | _, f when f < 20 ->
-      Error "Score cannot be taken until the end of the game"
-  | g, _ -> Ok (List.chunks_of ~length:2 g |> count_points)
-
-
+  | t, 20, (a, 10) when a < 10 && (a + t > 10) ->
+      Error "Pin count exceeds pins on the lane"
+  | _, f, _       when f > 20 -> Error "Cannot roll after game is over"
+  | _, 20, (a, b) when a + b < 10 -> Error "Cannot roll after game is over"
+  | t, f, _       when t = 10 && (Int.rem f 2 = 0) && f < 18 -> (* Strike *)
+      Ok {game = t :: game; frames = f + 2 }
+  | _ -> Ok {game = throw :: game; frames = frames + 1 } (* Open *)
