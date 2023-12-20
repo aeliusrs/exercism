@@ -25,21 +25,14 @@ let get_connected board player y x = (* check cell have connection *)
   ] in
   List.filter ps ~f:(fun (y', x') -> Char.equal (retrieve board y' x') player)
 
-let path_equal path path' = (* compare list of coordinate *)
-  List.map2 path path' ~f:(fun (y1, x1) (y2, x2) -> y1 = y2 && x1 = x2)
-  |> function
-    | Ok l -> List.for_all l ~f:(Bool.equal true)
-    | Unequal_lengths -> false
-
 let add_path board player stones = (* get connect coordinate for each element *)
   List.fold stones ~init:stones ~f:(fun acc (y, x) ->
     List.append acc (get_connected board player y x)) (* append connected *)
-  |> List.dedup_and_sort ~compare:(fun (y1, x1) (y2, x2) ->
-      if y1 <> y2 then y1 - y2 else x1 - x2)
+  |> List.dedup_and_sort ~compare:Poly.compare
 
 let rec get_paths board player width stones =
   let stones' = add_path board player stones in
-  if List.exists stones ~f:(fun (_, x) -> x = width) || path_equal stones stones'
+  if List.exists stones ~f:(fun (_, x) -> x = width) || List.equal Poly.equal stones stones'
   then stones
   else (get_paths board player width stones')
 
@@ -49,7 +42,7 @@ let compute board player =
   let start_ps = get_ps board player 0 in (* get first row *)
   let end_ps = get_ps board player width in (* get last row *)
   let paths = get_paths board player width start_ps in (* get list of coord *)
-  List.map end_ps ~f:(fun (y1, x1) ->
+  List.map end_ps ~f:(fun (y1, x1) -> (* search end ps in paths *)
     List.exists paths ~f:(fun (y2, x2) -> y1 = y2 && x1 = x2))
   |> List.exists ~f:(Bool.equal true)
 

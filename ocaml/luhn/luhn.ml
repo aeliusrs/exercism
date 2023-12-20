@@ -8,16 +8,13 @@ let doubling i c =
   | true, n -> n * 2
   | _ -> n
 
-let allowed s =
-  String.for_all ~f:Char.is_digit s &&
-  String.length s > 1 
+let allowed s = String.for_all ~f:Char.is_digit s && String.length s > 1
 
 let valid s =
-  let s = String.filter ~f:(fun c -> not (Char.is_whitespace c)) s in
+  let s = String.filter s ~f:(fun c -> not (Char.is_whitespace c)) in
   match allowed s with
   | true -> s
-    |> String.to_list
-    |> List.rev
+    |> String.to_list_rev
     |> List.foldi ~init:0 ~f:(fun i acc n -> acc + (doubling i n))
     |> Fn.flip ( % ) 10
     |> ( = ) 0

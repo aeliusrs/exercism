@@ -15,13 +15,8 @@ let get_line n =
   ^ take ^ bottom ^ " of beer on the wall."
 
 let recite from until =
-  Sequence.unfold ~init:(from, until)
-  ~f:(fun (fr, un) ->
-    if un <= 0 || fr < 0 then
-      None
-    else
-      Some (get_line fr, (Int.pred fr, Int.pred un))
-    )
-  |> Sequence.to_list
-  |> List.fold_left ~init:"" ~f:(fun acc str -> acc ^ str ^ "\n\n")
+  Sequence.unfold ~init:(from, until) ~f:(fun (from', until') ->
+    if until' <= 0 || from' < 0 then None
+    else Some (get_line from', (Int.pred from', Int.pred until')))
+  |> Sequence.fold ~init:"" ~f:(fun acc str -> acc ^ str ^ "\n\n")
   |> String.strip

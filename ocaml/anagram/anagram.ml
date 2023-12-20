@@ -1,27 +1,17 @@
-
-let is_alpha = function 'a' .. 'z' -> true | _ -> false
+open Base
 
 let sanitize str =
-  str
-  |> String.trim
-  |> String.lowercase_ascii
+  str |> String.strip |> String.lowercase |> String.filter ~f:Char.is_alpha
 
 let to_list str =
-  str
-  |> String.to_seq
-  |> List.of_seq
-  |> List.filter (fun l -> is_alpha l)
-  |> List.sort compare
+  str |> String.to_list |> List.sort ~compare:Char.compare
 
 let is_anagram word str =
-  let w = word |> sanitize |> to_list in
-  let s = str  |> sanitize |> to_list in
-  match w, s with
-  | n, m when List.length n != List.length m -> false
-  | n, m when n = m -> true
+  match to_list word, to_list str with
+  | w, s when List.length w <> List.length s -> false
+  | w, s when List.equal Char.equal w s -> true
   | _ -> false
 
 let anagrams word wlist =
-  wlist
-  |> List.filter (fun str -> (sanitize word) <> (sanitize str))
-  |> List.filter (fun str -> is_anagram word str)
+  List.filter wlist ~f:(fun s -> String.(<>) (sanitize word) (sanitize s) &&
+  is_anagram (sanitize word) (sanitize s))

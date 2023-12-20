@@ -4,7 +4,7 @@ let encode str =
   String.to_list str
   |> List.group ~break:(fun a b -> not(Char.equal a b))
   |> List.map ~f:(fun l -> match List.length l with
-     | 1 -> List.nth_exn l 0 |> String.of_char
+     | 1 -> List.hd_exn l |> String.of_char
      | n -> (Int.to_string n) ^ (List.nth_exn l 0 |> String.of_char))
   |> String.concat
 
