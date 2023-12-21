@@ -1,8 +1,13 @@
 open Base
 
-let sanitize arr = Array.to_list arr |> List.map ~f:String.to_list
+(* ----------------------- TOOL *)
 
-(* TODO ADD MORE CHECKING FOR THE INDEX... *)
+(* exclude element at index i in a list *)
+let exclude lst i = List.filteri lst ~f:(fun i' _ -> i <> i')
+
+let rotate (x, y) = (y, x)
+
+let can_connect a b = Int.equal (snd a) (fst b)
 
 (* check that all element in a row are valid *)
 let is_row board row_idx start_idx end_idx =
@@ -27,28 +32,44 @@ let is_col board col_idx start_idx end_idx =
     |> List.sub ~pos:start_idx ~len:(end_idx - start_idx)
     |> List.for_all ~f:(fun c -> Char.equal c '|' || Char.equal c '+')
 
-(* Collect coordinate of all corners *)
-let get_corners board =
+(* ----------------------- get COORDINATE *)
+let collect_corners board =
   List.concat_mapi board ~f:(fun x str ->
     List.foldi str ~init:[] ~f:(fun y acc c ->
       if Char.equal c '+' then (x, y) :: acc else acc))
 
-(* REFACTO TO BE MORE READABLE *)
-let count_rectangles arr =
-  let board = sanitize arr in
-  let corners = get_corners board in
-  List.filter corners ~f:(fun top_left ->
-    List.exists corners ~f:(fun bot_right ->
-      Poly.compare top_left bot_right < 0 &&
-      let bot_left = (bot_right |> fst, top_left |> snd) in
-      let top_right = (top_left |> fst, bot_right |> snd) in
-      List.mem corners top_right ~equal:Poly.equal &&
-      List.mem corners bot_left ~equal:Poly.equal &&
-      is_row board (fst top_left) (snd top_left) (snd bot_right) &&
-      is_row board (fst bot_right) (snd top_left) (snd bot_right) &&
-      is_col board (snd top_left) (fst top_left) (fst bot_right) &&
-      is_col board (snd bot_right) (fst top_left) (fst bot_right)
-    )
-  )
-  |> List.length
+let validate_corners board hd lst =
+  lst
+  |> List.filter ~f:(fun e -> Poly.compare hd e <= 0)
+  |> List.filter ~f:(fun e ->
+      match hd, e with
+      | (x, y), (x', y') when x <= x' && y <= y' ->
+          is_row board x y y' && is_col board y x x'
+      | _ -> false)
 
+(* Collect all '+' knows as corners
+   Sort the list
+   Generate List of sublist for each coordinate of corners
+   apply validate_corners to check the connection are valid character
+   Filter to keep only the coordinate that have 4 or more connection *)
+let get_corners board =
+  collect_corners board
+  |> List.sort ~compare:Poly.compare
+  |> fun lst -> List.mapi lst ~f:(fun i hd -> hd :: (exclude lst i))
+  |> List.map ~f:(fun lst ->
+      let hd = List.hd_exn lst in (validate_corners board hd lst))
+  |> List.filter ~f:(fun l -> (List.length l) > 3)
+
+let compute lst =
+  List.map lst ~f:(function | [] -> [] | (hd :: tl) as l ->
+      build_chains [hd] l
+      |> List.tl_exn
+      |> List.chunks_of ~length:4
+      |> List.filter ~f:(fun l' -> List.length l' > 3))
+  |> List.concat
+
+
+(* ----------------------- MAIN *)
+let sanitize arr = Array.to_list arr |> List.map ~f:String.to_list
+
+let count_rectangles board = sanitize board |> get_corners |> compute
