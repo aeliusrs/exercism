@@ -2,7 +2,6 @@ open Base
 
 (* ----------------------- TOOL *)
 
-(* exclude element at index i in a list *)
 let exclude lst i = List.filteri lst ~f:(fun i' _ -> i <> i')
 
 let rotate (x, y) = (y, x)
@@ -36,16 +35,20 @@ let is_col board col_idx start_idx end_idx =
 let collect_corners board =
   List.concat_mapi board ~f:(fun x str ->
     List.foldi str ~init:[] ~f:(fun y acc c ->
-      if Char.equal c '+' then (x, y) :: acc else acc))
+      if Char.equal c '+' then acc @ [(x, y)]  else acc))
 
 let validate_corners board hd lst =
-  lst
-  |> List.filter ~f:(fun e -> Poly.compare hd e <= 0)
-  |> List.filter ~f:(fun e ->
-      match hd, e with
-      | (x, y), (x', y') when x <= x' && y <= y' ->
-          is_row board x y y' && is_col board y x x'
-      | _ -> false)
+  List.filter lst ~f:(fun e' ->
+    match hd, e' with
+    | (x, y), (x', y') when x <= x' && y <= y' ->
+        is_row board x y y' || is_col board y x x'
+    | _ -> false)
+
+let is_rectangle board tl br =
+  let lst = [(snd br, fst tl);(snd tl, fst br)] in
+  let tl_lst = (validate_corners board tl lst) in
+  let br_lst = (validate_corners board br lst) in
+  List.length tl_lst = 2 && List.length br_lst = 2
 
 (* Collect all '+' knows as corners
    Sort the list
@@ -54,19 +57,15 @@ let validate_corners board hd lst =
    Filter to keep only the coordinate that have 4 or more connection *)
 let get_corners board =
   collect_corners board
-  |> List.sort ~compare:Poly.compare
-  |> fun lst -> List.mapi lst ~f:(fun i hd -> hd :: (exclude lst i))
-  |> List.map ~f:(fun lst ->
-      let hd = List.hd_exn lst in (validate_corners board hd lst))
-  |> List.filter ~f:(fun l -> (List.length l) > 3)
+  |> fun lst -> List.mapi lst ~f:(fun i top_left ->
+      let lst' = exclude lst i
+        |> List.filter ~f:(fun e -> Poly.compare top_left e <= 0)
+        |> List.rev
+      in
+      (top_left, lst'))
+  |> List.map ~f:(fun (tl, lst) ->
+      tl, List.map lst ~f:(fun br -> is_rectangle board tl br))
 
-let compute lst =
-  List.map lst ~f:(function | [] -> [] | (hd :: tl) as l ->
-      build_chains [hd] l
-      |> List.tl_exn
-      |> List.chunks_of ~length:4
-      |> List.filter ~f:(fun l' -> List.length l' > 3))
-  |> List.concat
 
 
 (* ----------------------- MAIN *)
