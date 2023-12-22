@@ -20,19 +20,19 @@ let generate_pairs tl i lst =
   |> List.map ~f:(fun br -> (tl, br))
 
 (* check that all element in a row are valid *)
-let is_row board row_idx start_idx end_idx =
-  List.nth board row_idx
+let is_row board row start stop =
+  List.nth board row
   |> function | None -> false | Some l ->
-     List.sub l ~pos:start_idx ~len:(end_idx - start_idx + 1)
+     List.sub l ~pos:start ~len:(stop - start + 1)
      |> List.for_all ~f:(fun c -> Char.equal c '-' || Char.equal c '+')
 
 (* check that all element in take sub col are valid *)
-let is_col board col_idx start_idx end_idx =
+let is_col board col start stop =
   board
   |> List.transpose_exn
-  |> Fn.flip List.nth col_idx
+  |> Fn.flip List.nth col
   |> function | None -> false | Some l ->
-     List.sub l ~pos:start_idx ~len:(end_idx - start_idx + 1)
+     List.sub l ~pos:start ~len:(stop - start + 1)
      |> List.for_all ~f:(fun c -> Char.equal c '|' || Char.equal c '+')
 
 (* generate top_right and bottom left coord
@@ -45,10 +45,9 @@ let is_rectangle board tl br =
 
 (* collect, generate needed coordinate and possible match, and apply
    is_rectangle to get a list of bool, then count number of bool *)
-let get_rectangles board =
+let count_rectangles board =
+  let board = sanitize board in
   collect_corners board
   |> fun lst -> List.concat_mapi lst ~f:(fun i tl -> generate_pairs tl i lst)
   |> List.map ~f:(fun (tl, br) -> is_rectangle board tl br |> Bool.to_int)
   |> List.fold ~init:0 ~f:(+)
-
-let count_rectangles board = sanitize board |> get_rectangles
