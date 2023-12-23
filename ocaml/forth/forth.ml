@@ -1,72 +1,59 @@
 open Base
 
-(* Instruction *)
-let get_pairs stack = match Stack.pop stack, Stack.pop stack with
-  | Some a, Some b -> Some (a, b)
+let custom_def = Hashtbl.create (module String)
+
+(* Tools*)
+let parse str =
+  let str = String.uppercase str in
+  match String.get str 0 with
+  | ':' -> [str]
+  | _ -> String.split ~on:' ' str
+
+let is_number str = String.for_all str ~f:Char.is_digit
+
+let is_definition str = Char.equal (String.get str 0) ':'
+
+let is_custom str = Hashtbl.find custom_def str |> Option.is_some
+
+(* Definition *)
+let parse_def def =
+  def
+  |> String.filter ~f:(fun c -> Char.(c <> ':' && c <> ';'))
+  |> String.strip
+  |> String.split ~on:' '
+
+let get_definition stack def =
+  match parse_def def with
+  | hd :: tl when not(is_number hd) ->
+      Hashtbl.set custom_def ~key:hd ~data:tl; Some stack
   | _ -> None
 
-let add stack = match get_pairs stack with
-  | Some (a, b) -> Int.(a + b) |> Stack.push stack
-  | None -> Stack.clear stack
+(* Apply instruction *)
+let rec run_definition stack def =
+  match Hashtbl.find custom_def def with
+  | Some lst -> List.fold lst ~init:(Some stack) ~f:compute
+  | None -> None
 
-let min stack = match get_pairs stack with
-  | Some (a, b) -> Int.(a - b) |> Stack.push stack
-  | None -> Stack.clear stack
-
-let mul stack = match get_pairs stack with
-  | Some (a, b) -> Int.(a * b) |> Stack.push stack
-  | None -> Stack.clear stack
-
-let div stack = match get_pairs stack with
-  | Some (a, b) -> Int.(a / b) |> Stack.push stack
-  | None -> Stack.clear stack
-
-let dup stack = match Stack.pop stack with
-  | Some x -> Stack.push stack x; Stack.push stack x
-  | None -> Stack.clear stack
-
-let swap stack = match get_pairs stack with
-  | Some (a, b) -> Stack.push stack b; Stack.push stack a
-  | None -> Stack.clear stack
-
-let over stack = ()
-
-let drop stack = ignore(Stack.pop stack)
-
-(* Tools *)
-let known_word = [|
-  ("+", add); ("-", min); ("*", mul); ("/", div);
-  ("dup", dup); ("drop", drop); ("swap", swap); ("over", over)
-|]
-
-let sanitize op = op |> String.lowercase |> String.split ~on:' '
-
-let is_number str = String.for_all ~f:Char.is_digit str
-
-let is_assign str = not(String.is_empty str) && Char.(String.get str 0 = ':')
-
-let assign op stack = ()
-
-let run word stack =
-  Array.find known_word ~f:(fun (w, _) -> String.equal word w)
-  |> function
-    | None -> ()
-    | Some (_, f) -> f stack
-
-let compute op stack =
-  sanitize op
-  |> List.iter ~f:(fun inst ->
-      if is_number inst then
-        Stack.push stack (inst |> Int.of_string)
-      else
-        run inst stack)
-
-let parse op stack =
-  if is_assign op then assign op stack else compute op stack
+and compute stack inst =
+  match inst, stack with
+  | w, Some stk when is_number w      -> Some ((Int.of_string w) :: stk)
+  | w, Some stk when is_custom w      -> run_definition stk w
+  | "+", Some (a :: b :: tl)      -> Some ((b + a) :: tl)
+  | "-", Some (a :: b :: tl)      -> Some ((b - a) :: tl)
+  | "*", Some (a :: b :: tl)      -> Some ((b * a) :: tl)
+  | "/", Some (a :: b :: tl) when a <> 0 && b <> 0 -> Some ((b / a) :: tl)
+  | "SWAP", Some (a :: b :: tl)   -> Some (b :: a :: tl)
+  | "OVER", Some (a :: b :: tl)   -> Some (b :: a :: b :: tl)
+  | "DUP", Some (a :: tl)         -> Some (a :: a :: tl)
+  | "DROP", Some (_ :: tl)        -> Some tl
+  | w, Some stk when is_definition w  -> get_definition stk w
+  | _, _       -> None
 
 let evaluate ops =
-  let ret = Stack.create() in
-  List.iter ops ~f:(fun op -> parse op ret);
-  match Stack.to_list ret with
-  | [] -> None
-  | r -> Some r
+  ops
+  |> List.map ~f:parse
+  |> List.concat
+  |> List.fold ~init:(Some []) ~f:compute
+  |> function
+    | None -> None
+    | Some stack -> Some (List.rev stack)
