@@ -1,53 +1,29 @@
 open Base
 
+let pick (s,lst) (s', lst') = if s <= s' then (s, lst) else (s', lst')
+
+let init_step = function | 0 -> (0, []) | _ -> (Int.max_value, [])
+
+let get i coin step = (* get function *)
+  if i >= coin && fst step.(i - coin) <> Int.max_value then
+    (1 + fst step.(i - coin), coin :: snd step.(i - coin))
+  else (Int.max_value, [])
 
 (* Algo *)
-let get_pairs range coins =
-  List.cartesian_product range coins
-  |> List.map ~f:(fun (a,c) -> if a - c >= 0 then (a, c) else (a, -1))
-  |> List.filter ~f:(fun (_, c) -> c >= 0)
+let find_change target coins =
+  let step = Array.init (Int.succ target) ~f:init_step in
+  let range = List.init target ~f:Int.succ in
+  List.iter range ~f:(fun i ->
+    let v =
+      List.fold coins ~init:(Int.max_value, []) ~f:(fun acc coin -> pick (get i coin step) acc)
+      in
+        step.(i) <- v;);
+   step.(target)
 
-let find_path pairs value =
-  let dp = Array.create ~len:(value + 1) Int.max_value in
-  let acc = Array.create ~len:(value + 1) [] in
-  dp.(0) <- 0;
-
-  Base.List.iter pairs ~f:(fun (_, coin) ->
-    Base.List.iter (List.range coin (value + 1)) ~f:(fun i ->
-        if i - coin >= 0 then begin
-          dp.(i) <- min dp.(i) (dp.(i - coin) + 1);
-          if dp.(i) < Int.max_value then
-            acc.(i) <- coin :: acc.(i - coin)
-        end
-    ));
-
-  acc
-  List.rev acc.(value)
-
-let comput target coins =
-    let step = Array.make (target + 1) Int.max_int in
-    let acc = Array.make (target + 1) [] in
-    let range = List.init target
-    let g counter x = if counter >= x && sub.(counter-x) != Int.max_int
-        then (1 + sub.(counter-x), x::sel.(counter-x))
-        else (Int.max_int, []) in
-    sub.(0) <- 0;
-    for counter = 1 to target do 
-        let g1 m x = cmin (g counter x) m in
-        let v, o  = List.fold_left g1 (Int.max_int, []) coins in
-        sub.(counter) <- v;
-        sel.(counter) <- o; 
-        done;
-    sub.(target), sel.(target);;
-
-
-let compute_change target coins =
-  let coins = List.filter coins ~f:(fun c -> c <= target) in
-  let range = List.init (Int.succ target) ~f:Fn.id in
-  let pairs = get_pairs range coins in
-  match find_path pairs target with
-  | [] -> Error "can't make target with given coins"
-  | lst -> Ok (List.rev lst)
+let compute_change t c =
+  match find_change t (List.rev c) with
+  | (i, _) when i = Int.max_value -> Error "can't make target with given coins"
+  | (_, lst) -> Ok (List.sort lst ~compare:Int.compare)
 
 (* Main *)
 let make_change ~target ~coins =

@@ -24,11 +24,9 @@ let tests = [
   "change with Lower Elbonia Coins" >::
   ae (Ok [21; 21; 21])
     (make_change ~target:63 ~coins:[1; 5; 10; 21; 25]);
-
  "large target values" >::
   ae (Ok [2; 2; 5; 20; 20; 50; 100; 100; 100; 100; 100; 100; 100; 100; 100])
     (make_change ~target:999 ~coins:[1; 2; 5; 10; 20; 50; 100]);
-
   "possible change without unit coins available" >::
   ae (Ok [2; 2; 2; 5; 10])
     (make_change ~target:21 ~coins:[2; 5; 10; 20; 50]);
