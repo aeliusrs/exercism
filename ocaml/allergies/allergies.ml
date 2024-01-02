@@ -1,14 +1,8 @@
 open Base
 
-type allergen = Eggs
-              | Peanuts
-              | Shellfish
-              | Strawberries
-              | Tomatoes
-              | Chocolate
-              | Pollen
-              | Cats
+type allergen = Eggs | Peanuts | Shellfish | Strawberries | Tomatoes | Chocolate | Pollen | Cats
 
+(* land operator is a bitwise and operator *)
 let allergic_to score allergen =
   let ascore =
     match allergen with
@@ -21,10 +15,9 @@ let allergic_to score allergen =
     | Pollen -> 64
     | Cats -> 128
   in
-  (* land operator is a bitwise and operator *)
-  let result = score land ascore in 
+  let result = score land ascore in
   result = ascore
 
 let allergies score =
   [ Eggs; Peanuts; Shellfish; Strawberries; Tomatoes; Chocolate; Pollen; Cats ]
-  |> List.filter ~f:(fun a -> allergic_to score a)
+  |> List.filter ~f:(allergic_to score)

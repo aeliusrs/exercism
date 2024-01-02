@@ -8,9 +8,9 @@ let encode ?(block_size=5) str =
   |> String.map ~f:(fun a -> if Char.is_alpha a then translate a else a)
   |> String.to_list
   |> List.chunks_of ~length:block_size
-  |> List.map ~f:(fun s -> String.of_char_list s)
+  |> List.map ~f:String.of_char_list
   |> String.concat ~sep: " "
 
 let decode str =
-  String.filter ~f:Char.is_alphanum str
+  String.filter str ~f:Char.is_alphanum
   |> String.map ~f:(fun a -> if Char.is_alpha a then translate a else a)
