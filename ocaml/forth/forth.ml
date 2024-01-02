@@ -9,7 +9,7 @@ let is_definition str = Char.equal (String.get str 0) ':'
 
 let is_custom str = Hashtbl.find custom_def str |> Option.is_some
 
-let return stack = Hashtbl.clear custom_def; List.rev stack
+let return stack = let _ = Hashtbl.clear custom_def in List.rev stack
 
 (* Definition functions *)
 let parse_definition def =

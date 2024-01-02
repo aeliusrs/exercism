@@ -14,4 +14,4 @@ let to_roman number = let open Base in
      | s when s >= 5    -> Some("V", (s-5))
      | 4                -> Some("IV", -1)
      | s                -> Some("I", (s-1)) )
-  |> Sequence.fold ~init:"" ~f:(fun acc str -> acc ^ str)
+  |> Sequence.fold ~init:"" ~f:String.(^)

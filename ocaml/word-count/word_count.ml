@@ -11,6 +11,5 @@ let word_count txt =
   |> List.filter_map ~f:(fun w ->
       match String.is_empty w with
       | true -> None
-      | false -> Some (clean w , 1)
-  )
+      | false -> Some (clean w , 1))
   |> Map.of_alist_fold (module String) ~init:0 ~f:(+)

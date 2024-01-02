@@ -18,5 +18,5 @@ let new_robot () = { name = gen_name () }
 let name robot = robot.name
 
 let reset robot =
-  Hash_set.remove known_serial robot.name; robot.name <- gen_name ()
+  let _ = Hash_set.remove known_serial robot.name in robot.name <- gen_name ()
 

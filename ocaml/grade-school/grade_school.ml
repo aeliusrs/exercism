@@ -1,6 +1,7 @@
 open Base
 
 module Int_map = Map.M(Int)
+
 type school = string list Int_map.t
 
 let empty_school = Map.empty (module Int)
@@ -13,7 +14,6 @@ let grade want school =
   |> List.filter ~f:(fun (g, _) -> g = want)
   |> List.concat_map ~f:(fun (_, name) -> name)
 
-let sorted school =
-  school |> Map.map ~f:(fun lst -> List.sort ~compare:String.compare lst)
+let sorted school = school |> Map.map ~f:(List.sort ~compare:String.compare)
 
 let roster school = school |> sorted |> Map.data |> List.concat
