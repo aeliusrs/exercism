@@ -32,11 +32,23 @@ let up z = Option.map z.top ~f:(function
   | (Left, top') -> { top' with left = Some z }
   | (Right, top') -> { top' with right = Some z })
 
-let to_tree (z : 'a t) : 'a Tree.t =
-
 let set_value v z = { z with focus = v }
 
 let set_left l z = { z with left = Option.map l ~f:of_tree }
 
 let set_right r z = { z with right = Option.map r ~f:of_tree }
 
+let rec to_root z =
+  match up z with
+  | None -> z
+  | Some z' -> to_root z'
+
+let to_tree z : 'a Tree.t =
+  let rec build z' : 'a Tree.t =
+    {
+      value = z'.focus;
+      left = Option.map z'.left ~f:build;
+      right = Option.map z'.right ~f:build
+    }
+  in
+  to_root z |> build
