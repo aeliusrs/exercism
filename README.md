@@ -19,3 +19,7 @@ So I've naturally start to fill the gap with online content.
 Doing ASM programming is a part of this effort to know better about
 computer.
 
+# Go
+As a DevOPS and in a company where network matter, learning Golang start to
+become a must for me, so 2024 resolution is to finally start learning it.
+
