@@ -11,6 +11,7 @@
     gcc
     go
     go-tools
+    golint
     gore
   ]);
   runScript = "bash";
