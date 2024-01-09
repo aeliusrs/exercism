@@ -12,6 +12,7 @@
     go
     go-tools
     golint
+    gopkgs
     gore
   ]);
   runScript = "bash";
