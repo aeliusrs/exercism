@@ -15,10 +15,9 @@ func ShuffleAnimals() []string {
 	"elephant", "fox", "giraffe", "hedgehog",
 	}
 
-	for i := len(list) - 1; i > 0; i-- {
-		j := rand.Intn(i + 1)
+	rand.Shuffle(len(list), func(i, j int) {
 		list[i], list[j] = list[j], list[i]
-	}
+	})
 	return list
 }
 
