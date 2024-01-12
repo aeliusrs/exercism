@@ -28,22 +28,17 @@ var protein = map[string]string{
 }
 
 
-func FromRNA(rna string) ([]string, error) {
-	var acc []string
-
+func FromRNA(rna string) (acc []string, err error) {
 	if len(rna) % 3 != 0 { return acc, ErrInvalidBase }
 
 	for i := 0; i < len(rna); i += 3 {
 		p, err := FromCodon(rna[i:(i + 3)])
 
-		if err == ErrInvalidBase {
-			return acc, err
-		} else if err == ErrStop {
-			break
-		}
+		if errors.Is(err, ErrInvalidBase) { return nil, err}
+		if errors.Is(err, ErrStop) { break }
 		acc = append(acc, p)
 	}
-	return acc, nil
+	return
 }
 
 func FromCodon(codon string) (string, error) {
