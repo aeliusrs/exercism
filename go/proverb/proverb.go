@@ -2,17 +2,14 @@ package proverb
 
 import "fmt"
 
+const line = "For want of a %s the %s was lost."
+const final = "And all for the want of a %s."
 
 func Proverb(rhyme []string) (acc []string) {
 	if len(rhyme) < 1 { return }
 
-	for i := 0; i < len(rhyme) - 1; i++ {
-		fst := rhyme[i]
-		snd := rhyme[i + 1]
-		str := fmt.Sprintf("For want of a %s the %s was lost.", fst, snd)
-		acc = append(acc, str)
+	for i, _ := range rhyme[:len(rhyme) - 1] {
+		acc = append(acc, fmt.Sprintf(line, rhyme[i], rhyme[i + 1]))
 	}
-	str := fmt.Sprintf("And all for the want of a %s.", rhyme[0])
-	acc = append(acc, str)
-	return
+	return append(acc, fmt.Sprintf(final, rhyme[0]))
 }
