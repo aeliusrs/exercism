@@ -2,40 +2,24 @@ package queenattack
 
 import "fmt"
 
-func abs(x int) int { if x < 0 { return -x }; return x }
-
-func parsePosition(pos string) (int, int, error) {
-	if len(pos) != 2 {
-		return 0, 0, fmt.Errorf("invalid position format: %s", pos)
-	}
-
-	cols := int(pos[0] - 'a')
-	rows := int(pos[1] - '1')
-	if cols < 0 || cols > 7 || rows < 0 || rows > 7 {
-		return 0, 0, fmt.Errorf("invalid position: %s", pos)
-	}
-	return cols, rows, nil
-}
-
-func canAttack(wX, wY, bX, bY int) bool {
-	switch {
-		case wY == bY: return true
-		case wX == bX: return true
-		case abs(wX-bX) == abs(wY-bY): return true
-		default: return false
-	}
-}
-
 func CanQueenAttack(whitePosition, blackPosition string) (bool, error) {
 	if whitePosition == blackPosition {
 		return false, fmt.Errorf("Can not be on the same case")
 	}
 
-	wX, wY, err := parsePosition(whitePosition)
-	if err != nil { return false, err }
+	t := [4]int{
+		int(whitePosition[0] - 'a'), // 0 -> white x
+		int(whitePosition[1] - '1'), // 1 -> white y
+		int(blackPosition[0] - 'a'), // 2 -> black x
+		int(blackPosition[1] - '1'), // 3 -> black y
+	}
 
-	bX, bY, err := parsePosition(blackPosition)
-	if err != nil { return false, err }
+	for _, v := range t {
+		if v < 0 || v > 7 {
+			return false, fmt.Errorf("Position outbound")
+		}
+	}
 
-	return canAttack(wX, wY, bX, bY), nil
+	return (t[1] == t[3] || t[0] == t[2] ||
+	t[1] - t[0] == t[3] - t[2] || t[1] - t[0] == t[2] - t[3]), nil
 }
