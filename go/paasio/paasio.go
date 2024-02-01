@@ -13,9 +13,9 @@ type writeCounter struct {
 	counter
 }
 
-type rwCounter struct {
-	writeCounter
-	readCounter
+type readWriteCounter struct {
+	WriteCounter
+	ReadCounter
 }
 
 // Counter interface
@@ -53,9 +53,9 @@ func NewReadCounter(reader io.Reader) ReadCounter {
 }
 
 func NewReadWriteCounter(readwriter io.ReadWriter) ReadWriteCounter {
-	return &rwCounter{
-		NewReadCounter(readwriter),
+	return &readWriteCounter{
 		NewWriteCounter(readwriter),
+		NewReadCounter(readwriter),
 	}
 }
 
