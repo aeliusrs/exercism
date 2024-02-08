@@ -13,6 +13,9 @@ func Use(opener ResourceOpener, input string) (err error) {
 		if _, ok := err.(TransientError); !ok { return err }
 	}
 
+	// ensuring the opener will be close
+	defer rs.Close()
+
 	/*
 		The recover function can be used to catch a panic 
 		and resume normal execution of the program.
@@ -28,8 +31,6 @@ func Use(opener ResourceOpener, input string) (err error) {
 		}
 	}()
 
-	// ensuring the opener will be close
-	defer rs.Close()
 
 	rs.Frob(input)
 	return err
